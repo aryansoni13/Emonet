@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎭 Real-Time Emotion Avatar</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1><i class="fas fa-theater-masks"></i> Real-Time Emotion Avatar</h1>
+            <p>Detect and visualize your emotions in real-time using AI</p>
+        </header>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Camera Section -->
+            <div class="camera-section">
+                <div class="camera-container">
+                    <video id="video" autoplay muted playsinline></video>
+                    <canvas id="canvas" style="display: none;"></canvas>
+                    
+                    <!-- Camera Controls -->
+                    <div class="camera-controls">
+                        <button id="startBtn" class="btn btn-primary">
+                            <i class="fas fa-play"></i> Start Camera
+                        </button>
+                        <button id="stopBtn" class="btn btn-secondary" disabled>
+                            <i class="fas fa-stop"></i> Stop Camera
+                        </button>
+                        <button id="captureBtn" class="btn btn-success" disabled>
+                            <i class="fas fa-camera"></i> Capture
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Emotion Display -->
+            <div class="emotion-section">
+                <div class="emotion-card">
+                    <div class="emotion-header">
+                        <h2>Current Emotion</h2>
+                        <div class="emotion-indicator" id="emotionIndicator">
+                            <span class="emotion-emoji" id="emotionEmoji">😐</span>
+                            <span class="emotion-text" id="emotionText">Neutral</span>
+                        </div>
+                    </div>
+                    
+                    <div class="emotion-details">
+                        <div class="detail-item">
+                            <label>Confidence:</label>
+                            <div class="confidence-bar">
+                                <div class="confidence-fill" id="confidenceFill"></div>
+                            </div>
+                            <span id="confidenceText">0%</span>
+                        </div>
+                        
+                        <div class="detail-item">
+                            <label>Description:</label>
+                            <p id="emotionDescription">Calm and composed</p>
+                        </div>
+                        
+                        <div class="detail-item">
+                            <label>Face Detected:</label>
+                            <span id="faceStatus" class="status-indicator">
+                                <i class="fas fa-times-circle"></i> No Face
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Emotion History -->
+                <div class="history-card">
+                    <h3>Emotion History</h3>
+                    <div class="emotion-timeline" id="emotionTimeline">
+                        <div class="timeline-placeholder">
+                            <i class="fas fa-chart-line"></i>
+                            <p>Emotion history will appear here</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Section -->
+        <div class="stats-section">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <i class="fas fa-brain"></i>
+                    <h3>AI Powered</h3>
+                    <p>Advanced facial recognition using MediaPipe</p>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-bolt"></i>
+                    <h3>Real-time</h3>
+                    <p>Instant emotion detection and visualization</p>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-shield-alt"></i>
+                    <h3>Privacy First</h3>
+                    <p>All processing happens locally in your browser</p>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-mobile-alt"></i>
+                    <h3>Mobile Ready</h3>
+                    <p>Works perfectly on all devices</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>&copy; 2024 Real-Time Emotion Avatar. Built with ❤️ using Flask & MediaPipe</p>
+            <div class="social-links">
+                <a href="https://github.com/aryansoni13" target="_blank" class="social-link"><i class="fab fa-github"></i></a>
+                <a href="https://www.linkedin.com/in/aryan-soni-26794924a/" target="_blank" class="social-link"><i class="fab fa-linkedin"></i></a>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <p>Initializing AI Model...</p>
+        </div>
+    </div>
+
+    <!-- Error Modal -->
+    <div id="errorModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-exclamation-triangle"></i> Error</h3>
+                <button class="close-btn" onclick="closeErrorModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="errorMessage">An error occurred while processing your request.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="closeErrorModal()">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html> 

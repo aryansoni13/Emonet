@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎭 Real-Time Emotion Avatar</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        /* Main Content */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        /* Camera Section */
+        .camera-section {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .camera-container {
+            text-align: center;
+        }
+
+        #video {
+            width: 100%;
+            max-width: 500px;
+            height: auto;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            background: #f0f0f0;
+        }
+
+        .camera-controls {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover:not(:disabled) {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+
+        /* Emotion Section */
+        .emotion-section {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .emotion-card, .history-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .emotion-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .emotion-header h2 {
+            font-size: 1.5rem;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .emotion-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            padding: 20px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 15px;
+            border: 2px solid #dee2e6;
+        }
+
+        .emotion-emoji {
+            font-size: 3rem;
+            animation: pulse 2s infinite;
+        }
+
+        .emotion-text {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* Emotion Details */
+        .emotion-details {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .detail-item label {
+            font-weight: 600;
+            color: #555;
+            min-width: 100px;
+        }
+
+        .confidence-bar {
+            flex: 1;
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #28a745, #20c997);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        #confidenceText {
+            font-weight: 600;
+            color: #28a745;
+            min-width: 40px;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+        }
+
+        .status-indicator i {
+            font-size: 1.2rem;
+        }
+
+        .status-indicator.detected {
+            color: #28a745;
+        }
+
+        .status-indicator.not-detected {
+            color: #dc3545;
+        }
+
+        /* History Card */
+        .history-card h3 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .emotion-timeline {
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .timeline-placeholder {
+            text-align: center;
+            color: #6c757d;
+            padding: 40px 20px;
+        }
+
+        .timeline-placeholder i {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            opacity: 0.5;
+        }
+
+        .emotion-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 12px 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .emotion-item .emoji {
+            font-size: 1.5rem;
+        }
+
+        .emotion-item .info {
+            flex: 1;
+        }
+
+        .emotion-item .name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .emotion-item .time {
+            font-size: 0.8rem;
+            color: #6c757d;
+        }
+
+        /* Stats Section */
+        .stats-section {
+            margin-bottom: 40px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card i {
+            font-size: 2.5rem;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .stat-card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .stat-card p {
+            color: #6c757d;
+            line-height: 1.5;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            color: white;
+            padding: 30px 0;
+            border-top: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .footer p {
+            margin-bottom: 15px;
+            opacity: 0.9;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .social-link {
+            color: white;
+            font-size: 1.5rem;
+            transition: transform 0.3s ease;
+        }
+
+        .social-link:hover {
+            transform: translateY(-3px);
+            opacity: 0.8;
+        }
+
+        /* Loading Overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .loading-content {
+            text-align: center;
+            color: white;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1001;
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border-radius: 15px;
+            padding: 0;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 30px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .modal-header h3 {
+            color: #dc3545;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #6c757d;
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .modal-footer {
+            padding: 20px 30px;
+            border-top: 1px solid #dee2e6;
+            text-align: right;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .camera-controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                width: 100%;
+                max-width: 200px;
+                justify-content: center;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .emotion-indicator {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .detail-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+            
+            .detail-item label {
+                min-width: auto;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .camera-section, .emotion-card, .history-card {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .emotion-emoji {
+                font-size: 2rem;
+            }
+            
+            .emotion-text {
+                font-size: 1.2rem;
+            }
+        }
+
+        /* Demo Mode Styles */
+        .demo-notice {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+        }
+
+        .demo-notice i {
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1><i class="fas fa-theater-masks"></i> Real-Time Emotion Avatar</h1>
+            <p>Detect and visualize your emotions in real-time using AI</p>
+        </header>
+
+        <!-- Demo Notice -->
+        <div class="demo-notice">
+            <i class="fas fa-info-circle"></i>
+            <strong>Demo Mode:</strong> This is a static demo version. For full functionality with real emotion detection, 
+            <a href="https://github.com/aryansoni13/Real_Time_Face_Emotion_Avatar" target="_blank" style="color: white; text-decoration: underline;">download the full application</a>.
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Camera Section -->
+            <div class="camera-section">
+                <div class="camera-container">
+                    <video id="video" autoplay muted playsinline></video>
+                    <canvas id="canvas" style="display: none;"></canvas>
+                    
+                    <!-- Camera Controls -->
+                    <div class="camera-controls">
+                        <button id="startBtn" class="btn btn-primary">
+                            <i class="fas fa-play"></i> Start Camera
+                        </button>
+                        <button id="stopBtn" class="btn btn-secondary" disabled>
+                            <i class="fas fa-stop"></i> Stop Camera
+                        </button>
+                        <button id="captureBtn" class="btn btn-success" disabled>
+                            <i class="fas fa-camera"></i> Capture
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Emotion Display -->
+            <div class="emotion-section">
+                <div class="emotion-card">
+                    <div class="emotion-header">
+                        <h2>Current Emotion</h2>
+                        <div class="emotion-indicator" id="emotionIndicator">
+                            <span class="emotion-emoji" id="emotionEmoji">😐</span>
+                            <span class="emotion-text" id="emotionText">Neutral</span>
+                        </div>
+                    </div>
+                    
+                    <div class="emotion-details">
+                        <div class="detail-item">
+                            <label>Confidence:</label>
+                            <div class="confidence-bar">
+                                <div class="confidence-fill" id="confidenceFill"></div>
+                            </div>
+                            <span id="confidenceText">0%</span>
+                        </div>
+                        
+                        <div class="detail-item">
+                            <label>Description:</label>
+                            <p id="emotionDescription">Calm and composed</p>
+                        </div>
+                        
+                        <div class="detail-item">
+                            <label>Face Detected:</label>
+                            <span id="faceStatus" class="status-indicator">
+                                <i class="fas fa-times-circle"></i> No Face
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Emotion History -->
+                <div class="history-card">
+                    <h3>Emotion History</h3>
+                    <div class="emotion-timeline" id="emotionTimeline">
+                        <div class="timeline-placeholder">
+                            <i class="fas fa-chart-line"></i>
+                            <p>Emotion history will appear here</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Section -->
+        <div class="stats-section">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <i class="fas fa-brain"></i>
+                    <h3>AI Powered</h3>
+                    <p>Advanced facial recognition using MediaPipe</p>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-bolt"></i>
+                    <h3>Real-time</h3>
+                    <p>Instant emotion detection and visualization</p>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-shield-alt"></i>
+                    <h3>Privacy First</h3>
+                    <p>All processing happens locally in your browser</p>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-mobile-alt"></i>
+                    <h3>Mobile Ready</h3>
+                    <p>Works perfectly on all devices</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>&copy; 2024 Real-Time Emotion Avatar. Built with ❤️ by Aryan Soni</p>
+            <div class="social-links">
+                <a href="https://github.com/aryansoni13" target="_blank" class="social-link"><i class="fab fa-github"></i></a>
+                <a href="https://www.linkedin.com/in/aryan-soni-26794924a/" target="_blank" class="social-link"><i class="fab fa-linkedin"></i></a>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <p>Initializing AI Model...</p>
+        </div>
+    </div>
+
+    <!-- Error Modal -->
+    <div id="errorModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-exclamation-triangle"></i> Error</h3>
+                <button class="close-btn" onclick="closeErrorModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="errorMessage">This is a demo version. For full emotion detection functionality, please download the complete application from GitHub.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="closeErrorModal()">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Demo version of the emotion avatar app
+        class DemoEmotionAvatarApp {
+            constructor() {
+                this.video = document.getElementById('video');
+                this.canvas = document.getElementById('canvas');
+                this.ctx = this.canvas.getContext('2d');
+                
+                // UI Elements
+                this.startBtn = document.getElementById('startBtn');
+                this.stopBtn = document.getElementById('stopBtn');
+                this.captureBtn = document.getElementById('captureBtn');
+                this.emotionEmoji = document.getElementById('emotionEmoji');
+                this.emotionText = document.getElementById('emotionText');
+                this.emotionDescription = document.getElementById('emotionDescription');
+                this.confidenceFill = document.getElementById('confidenceFill');
+                this.confidenceText = document.getElementById('confidenceText');
+                this.faceStatus = document.getElementById('faceStatus');
+                this.emotionTimeline = document.getElementById('emotionTimeline');
+                this.loadingOverlay = document.getElementById('loadingOverlay');
+                
+                // State
+                this.stream = null;
+                this.isProcessing = false;
+                this.processingInterval = null;
+                this.emotionHistory = [];
+                this.lastEmotion = null;
+                this.demoEmotions = ['happy', 'sad', 'angry', 'surprise', 'neutral', 'fear', 'disgust'];
+                this.currentDemoEmotion = 0;
+                
+                // Initialize
+                this.init();
+            }
+            
+            init() {
+                this.bindEvents();
+                this.hideLoading();
+            }
+            
+            bindEvents() {
+                this.startBtn.addEventListener('click', () => this.startCamera());
+                this.stopBtn.addEventListener('click', () => this.stopCamera());
+                this.captureBtn.addEventListener('click', () => this.captureImage());
+            }
+            
+            async startCamera() {
+                try {
+                    this.showLoading('Accessing camera...');
+                    
+                    this.stream = await navigator.mediaDevices.getUserMedia({
+                        video: {
+                            width: { ideal: 640 },
+                            height: { ideal: 480 },
+                            facingMode: 'user'
+                        }
+                    });
+                    
+                    this.video.srcObject = this.stream;
+                    this.video.play();
+                    
+                    this.video.addEventListener('loadedmetadata', () => {
+                        this.canvas.width = this.video.videoWidth;
+                        this.canvas.height = this.video.videoHeight;
+                        this.startDemoProcessing();
+                        this.updateUI('camera', 'started');
+                        this.hideLoading();
+                    });
+                    
+                } catch (error) {
+                    this.hideLoading();
+                    this.showError('Failed to access camera: ' + error.message);
+                }
+            }
+            
+            stopCamera() {
+                if (this.stream) {
+                    this.stream.getTracks().forEach(track => track.stop());
+                    this.stream = null;
+                }
+                
+                this.stopProcessing();
+                this.updateUI('camera', 'stopped');
+                this.resetEmotionDisplay();
+            }
+            
+            startDemoProcessing() {
+                if (this.processingInterval) return;
+                
+                this.isProcessing = true;
+                this.processingInterval = setInterval(() => {
+                    this.demoEmotionDetection();
+                }, 2000); // Change emotion every 2 seconds for demo
+            }
+            
+            stopProcessing() {
+                this.isProcessing = false;
+                if (this.processingInterval) {
+                    clearInterval(this.processingInterval);
+                    this.processingInterval = null;
+                }
+            }
+            
+            demoEmotionDetection() {
+                // Demo emotion data
+                const emotions = {
+                    'happy': { emoji: '😊', color: '#00FF00', description: 'Joyful and cheerful', confidence: 0.85 },
+                    'sad': { emoji: '😢', color: '#FF0000', description: 'Down and melancholic', confidence: 0.72 },
+                    'angry': { emoji: '😠', color: '#0000FF', description: 'Frustrated and upset', confidence: 0.91 },
+                    'surprise': { emoji: '😲', color: '#00FFFF', description: 'Shocked and amazed', confidence: 0.78 },
+                    'neutral': { emoji: '😐', color: '#FFFFFF', description: 'Calm and composed', confidence: 0.65 },
+                    'fear': { emoji: '😨', color: '#FF8C00', description: 'Scared and anxious', confidence: 0.83 },
+                    'disgust': { emoji: '🤢', color: '#8A2BE2', description: 'Repulsed and disturbed', confidence: 0.76 }
+                };
+                
+                const emotion = this.demoEmotions[this.currentDemoEmotion];
+                const emotionData = emotions[emotion];
+                
+                this.updateEmotionDisplay({
+                    emotion: emotion,
+                    confidence: emotionData.confidence,
+                    emoji: emotionData.emoji,
+                    color: emotionData.color,
+                    description: emotionData.description,
+                    face_detected: true
+                });
+                
+                // Cycle through emotions
+                this.currentDemoEmotion = (this.currentDemoEmotion + 1) % this.demoEmotions.length;
+            }
+            
+            updateEmotionDisplay(data) {
+                // Update emotion display
+                this.emotionEmoji.textContent = data.emoji;
+                this.emotionText.textContent = data.emotion.charAt(0).toUpperCase() + data.emotion.slice(1);
+                this.emotionDescription.textContent = data.description;
+                
+                // Update confidence
+                const confidencePercent = Math.round(data.confidence * 100);
+                this.confidenceFill.style.width = confidencePercent + '%';
+                this.confidenceText.textContent = confidencePercent + '%';
+                
+                // Update face detection status
+                this.updateFaceStatus(data.face_detected);
+                
+                // Update emotion history
+                if (data.face_detected && data.emotion !== this.lastEmotion) {
+                    this.addToHistory(data);
+                    this.lastEmotion = data.emotion;
+                }
+                
+                // Update emotion indicator color
+                this.updateEmotionColor(data.color);
+            }
+            
+            updateFaceStatus(detected) {
+                const statusElement = this.faceStatus;
+                
+                if (detected) {
+                    statusElement.innerHTML = '<i class="fas fa-check-circle"></i> Face Detected';
+                    statusElement.className = 'status-indicator detected';
+                } else {
+                    statusElement.innerHTML = '<i class="fas fa-times-circle"></i> No Face';
+                    statusElement.className = 'status-indicator not-detected';
+                }
+            }
+            
+            updateEmotionColor(color) {
+                const indicator = document.getElementById('emotionIndicator');
+                indicator.style.borderColor = color;
+                indicator.style.background = `linear-gradient(135deg, ${color}20 0%, ${color}10 100%)`;
+            }
+            
+            addToHistory(emotionData) {
+                const timestamp = new Date().toLocaleTimeString();
+                
+                this.emotionHistory.unshift({
+                    emotion: emotionData.emotion,
+                    emoji: emotionData.emoji,
+                    confidence: emotionData.confidence,
+                    timestamp: timestamp
+                });
+                
+                // Keep only last 10 emotions
+                if (this.emotionHistory.length > 10) {
+                    this.emotionHistory.pop();
+                }
+                
+                this.updateTimeline();
+            }
+            
+            updateTimeline() {
+                if (this.emotionHistory.length === 0) {
+                    this.emotionTimeline.innerHTML = `
+                        <div class="timeline-placeholder">
+                            <i class="fas fa-chart-line"></i>
+                            <p>Emotion history will appear here</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                this.emotionTimeline.innerHTML = this.emotionHistory.map(item => `
+                    <div class="emotion-item">
+                        <span class="emoji">${item.emoji}</span>
+                        <div class="info">
+                            <div class="name">${item.emotion.charAt(0).toUpperCase() + item.emotion.slice(1)}</div>
+                            <div class="time">${item.timestamp} (${Math.round(item.confidence * 100)}%)</div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            resetEmotionDisplay() {
+                this.emotionEmoji.textContent = '😐';
+                this.emotionText.textContent = 'Neutral';
+                this.emotionDescription.textContent = 'Calm and composed';
+                this.confidenceFill.style.width = '0%';
+                this.confidenceText.textContent = '0%';
+                this.updateFaceStatus(false);
+                this.updateEmotionColor('#FFFFFF');
+            }
+            
+            updateUI(action, state) {
+                switch (action) {
+                    case 'camera':
+                        if (state === 'started') {
+                            this.startBtn.disabled = true;
+                            this.stopBtn.disabled = false;
+                            this.captureBtn.disabled = false;
+                        } else {
+                            this.startBtn.disabled = false;
+                            this.stopBtn.disabled = true;
+                            this.captureBtn.disabled = true;
+                        }
+                        break;
+                }
+            }
+            
+            captureImage() {
+                if (!this.stream) return;
+                
+                // Create a temporary canvas for capture
+                const captureCanvas = document.createElement('canvas');
+                const captureCtx = captureCanvas.getContext('2d');
+                
+                captureCanvas.width = this.video.videoWidth;
+                captureCanvas.height = this.video.videoHeight;
+                
+                // Draw current frame
+                captureCtx.drawImage(this.video, 0, 0);
+                
+                // Create download link
+                const link = document.createElement('a');
+                link.download = `emotion-avatar-demo-${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.png`;
+                link.href = captureCanvas.toDataURL();
+                link.click();
+            }
+            
+            showLoading(message = 'Loading...') {
+                this.loadingOverlay.style.display = 'flex';
+                this.loadingOverlay.querySelector('p').textContent = message;
+            }
+            
+            hideLoading() {
+                this.loadingOverlay.style.display = 'none';
+            }
+            
+            showError(message) {
+                document.getElementById('errorMessage').textContent = message;
+                document.getElementById('errorModal').style.display = 'block';
+            }
+        }
+
+        // Global functions for modal
+        function closeErrorModal() {
+            document.getElementById('errorModal').style.display = 'none';
+        }
+
+        // Initialize app when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            new DemoEmotionAvatarApp();
+        });
+
+        // Close modal when clicking outside
+        window.addEventListener('click', (event) => {
+            const modal = document.getElementById('errorModal');
+            if (event.target === modal) {
+                closeErrorModal();
+            }
+        });
+    </script>
+</body>
+</html> 

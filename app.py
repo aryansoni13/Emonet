@@ -171,6 +171,9 @@ def process_frame():
         if frame is None:
             return jsonify({'error': 'Invalid image data'}), 400
         
+        # Resize frame
+        frame = cv2.resize(frame, (320, 240))
+        
         # Process frame
         emotion_data = avatar.process_frame(frame)
         

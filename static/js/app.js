@@ -86,7 +86,7 @@ class EmotionAvatarApp {
         this.isProcessing = true;
         this.processingInterval = setInterval(() => {
             this.processFrame();
-        }, 100); // Process every 100ms for smooth experience
+        }, 300); // Process every 300ms for smooth experience
     }
     
     stopProcessing() {
